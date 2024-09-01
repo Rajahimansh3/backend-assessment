@@ -95,36 +95,42 @@ def get_transactions_by_type(type):
         conn.close()
 
 # function to calculate the sum of all linked transactions
-def calculate_sum_iterative(transaction_id):
-    total_sum = 0
-    stack = [transaction_id] # using stack to handle large datasets and deep hierarchies effectively.
+def calculate_sum(transaction_id):
     conn = get_db_connection()
     if conn is None:
         print("Failed to connect to the database.")
         return None
-    
-    cur = conn.cursor()
+
+    cur = conn.cursor() 
     try:
+        cur.execute("SELECT id, amount, parent_id FROM transactions")  # Fetch all transactions
+        rows = cur.fetchall()
+        
+        transactions = {} 
+        for row in rows:
+            transactions[row[0]] = {"amount": row[1], "parent_id": row[2]}
+
+        children_map = {}  # Mapping parent transactionIDs to their children
+        for row in rows:
+            parent_id = row[2]
+            if parent_id is not None:
+                if parent_id not in children_map:
+                    children_map[parent_id] = []
+                children_map[parent_id].append(row[0])
+
+        stack = [transaction_id] # using a stack instead of recursive call for large dataset
+
+        total_sum = 0
+        
         while stack:
             current_id = stack.pop()
-            
-            cur.execute("SELECT amount FROM transactions WHERE id = %s", (current_id,))
-            result = cur.fetchone()
-            if result is None:
-                print(f"Transaction ID {current_id} not found.")
-                continue            
-            amount = result[0]
-            total_sum += amount
-            # Fetch all child transactions linked by parent_id
-            cur.execute("SELECT id FROM transactions WHERE parent_id = %s", (current_id,))
-            children = cur.fetchall()
-            
-            # Add child transaction IDs to the stack
-            for child in children:
-                stack.append(child[0])
-                
+            total_sum += transactions[current_id]["amount"]
+
+            if current_id in children_map: # Add child transactions to the stack if they exist
+                stack.extend(children_map[current_id])
+
     except Exception as e:
-        print(f"Error during iterative sum calculation: {e}")
+        print(f"Error during sum calculation: {e}")
         return None
     finally:
         cur.close()
@@ -140,10 +146,10 @@ def get_transaction_sum(transaction_id):
         return jsonify({"error": "Transaction ID must not be empty, blank, or negative"}), 400
     
     try:
-        total_sum = calculate_sum_iterative(transaction_id)
-        
+        total_sum = calculate_sum(transaction_id)
         if total_sum is None: # Check for errors
-            return jsonify({"error": f"Unable to calculate sum for transaction ID {transaction_id} due to missing data or connection failure."}), 400
+            return jsonify({"error": f"Unable to calculate sum for transaction ID {transaction_id}."}), 400
+        
         return jsonify({"sum": total_sum}), 200
     except Exception as e:
         return jsonify({"error": str(e)}), 400
