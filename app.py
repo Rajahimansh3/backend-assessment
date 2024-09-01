@@ -94,51 +94,43 @@ def get_transactions_by_type(type):
         cur.close()
         conn.close()
 
-# Recursive function to calculate the sum of all linked transactions
-def calculate_sum(transaction_id):
+# function to calculate the sum of all linked transactions
+def calculate_sum_iterative(transaction_id):
+    total_sum = 0
+    stack = [transaction_id] # using stack to handle large datasets and deep hierarchies effectively.
     conn = get_db_connection()
     if conn is None:
         print("Failed to connect to the database.")
-        return None  
-
+        return None
+    
     cur = conn.cursor()
     try:
-        # Fetch the base amount of the current transaction
-        cur.execute("SELECT amount FROM transactions WHERE id = %s", (transaction_id,))
-        base_amount = cur.fetchone()
-        
-        if not base_amount:
-            print(f"Transaction ID {transaction_id} not found.")
-            return None 
-
-        base_amount = base_amount[0] 
-
-        # Fetch all child transactions linked by parent_id
-        cur.execute("SELECT id FROM transactions WHERE parent_id = %s", (transaction_id,))
-        children = cur.fetchall()        
-
-        if children is None:
-            children = []
-
+        while stack:
+            current_id = stack.pop()
+            
+            cur.execute("SELECT amount FROM transactions WHERE id = %s", (current_id,))
+            result = cur.fetchone()
+            if result is None:
+                print(f"Transaction ID {current_id} not found.")
+                continue            
+            amount = result[0]
+            total_sum += amount
+            # Fetch all child transactions linked by parent_id
+            cur.execute("SELECT id FROM transactions WHERE parent_id = %s", (current_id,))
+            children = cur.fetchall()
+            
+            # Add child transaction IDs to the stack
+            for child in children:
+                stack.append(child[0])
+                
     except Exception as e:
-        print(f"Unexpected error during sum calculation: {str(e)}")
+        print(f"Error during iterative sum calculation: {e}")
         return None
     finally:
         cur.close()
         conn.close()
-
-    # Calculate the total sum including all linked child transactions
-    total = base_amount
-    for child in children:
-        child_id = child[0]
-        child_sum = calculate_sum(child_id)
-        if child_sum is None:
-            print(f"Error calculating sum for child transaction ID {child_id}.")
-            return None
-
-        total += child_sum
-
-    return total
+    
+    return total_sum
 
 # Endpoint to get the sum of all linked transactions
 @app.route('/transactionservice/sum/<int:transaction_id>', methods=['GET'])
@@ -148,7 +140,7 @@ def get_transaction_sum(transaction_id):
         return jsonify({"error": "Transaction ID must not be empty, blank, or negative"}), 400
     
     try:
-        total_sum = calculate_sum(transaction_id)
+        total_sum = calculate_sum_iterative(transaction_id)
         
         if total_sum is None: # Check for errors
             return jsonify({"error": f"Unable to calculate sum for transaction ID {transaction_id} due to missing data or connection failure."}), 400
