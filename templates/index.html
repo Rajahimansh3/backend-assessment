@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Transaction Service UI</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+</head>
+<body>
+    <h1>Transaction UI</h1>
+    <h2>Create or Update Transaction</h2>
+    <form id="transactionForm">
+        <label for="transaction_id">Transaction ID:</label>
+        <input type="number" id="transaction_id" name="transaction_id" required><br><br>
+        <label for="amount">Amount:</label>
+        <input type="number" id="amount" name="amount" required><br><br>
+        <label for="type">Type:</label>
+        <input type="text" id="type" name="type" required><br><br>
+        <label for="parent_id">Parent ID:</label>
+        <input type="number" id="parent_id" name="parent_id"><br><br>
+        <button type="button" onclick="createTransaction()">Submit</button>
+    </form>
+
+    <h2>Get Transaction by ID</h2>
+    <input type="number" id="get_transaction_id" placeholder="Transaction ID">
+    <button type="button" onclick="getTransaction()">Get Transaction</button>
+
+    <h2>Get Transactions by Type</h2>
+    <input type="text" id="get_type" placeholder="Transaction Type">
+    <button type="button" onclick="getTransactionsByType()">Get Transactions</button>
+
+    <h2>Get Sum of Linked Transactions</h2>
+    <input type="number" id="sum_transaction_id" placeholder="Transaction ID">
+    <button type="button" onclick="getTransactionSum()">Get Sum</button>
+
+    <!-- Display Results -->
+    <h2>Results</h2>
+    <pre id="results"></pre>
+
+    <script src="{{ url_for('static', filename='main.js') }}"></script>
+</body>
+</html>
