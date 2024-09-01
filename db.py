@@ -1,5 +1,3 @@
-# db.py
-
 import pymysql
 from config import Config
 
