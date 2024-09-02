@@ -1,7 +1,7 @@
 
 // Function to create or update a transaction
 function createTransaction() {
-    
+
     const transactionId = document.getElementById('transaction_id').value;
     const amount = document.getElementById('amount').value;
     const type = document.getElementById('type').value;
@@ -49,7 +49,7 @@ function getTransaction() {
         });
 }
 
-// Function to get transactions by type
+// Function to get transactions using type
 function getTransactionsByType() {
     const type = document.getElementById('get_type').value;
 
@@ -64,7 +64,7 @@ function getTransactionsByType() {
         });
 }
 
-// Function to get the sum of linked transactions
+// Function to get the sum 
 function getTransactionSum() {
     const transactionId = document.getElementById('sum_transaction_id').value;
 

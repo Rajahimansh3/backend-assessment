@@ -65,6 +65,7 @@ def get_transaction(transaction_id):
     try:
         cur.execute("SELECT amount, type, parent_id FROM transactions WHERE id = %s", (transaction_id,))
         row = cur.fetchone()
+
         if row:
             return jsonify({"amount": row[0], "type": row[1], "parent_id": row[2]}), 200
         else:
@@ -84,6 +85,7 @@ def get_transactions_by_type(type):
         return jsonify({"error": "Failed to connect to the database"}), 500
 
     cur = conn.cursor()
+    
     try:
         cur.execute("SELECT id FROM transactions WHERE type = %s", (type,))
         rows = cur.fetchall()

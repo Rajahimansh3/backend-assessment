@@ -37,7 +37,7 @@ This project is a backend service built with Flask for managing transactions, in
     **Explanation**: This method replaces recursion with an iterative approach using a manual stack, which helps prevent errors from too many nested calls (common in deep hierarchies). By managing the processing of transactions manually, it makes the system more reliable and capable of handling large and complex data structures without crashing.
 
 
-## UI Guide
+## UI Guide for APIs testing
 
 The UI is a simple interface that allows you to interact with the backend APIs directly from your browser.
 
@@ -46,6 +46,19 @@ The UI is a simple interface that allows you to interact with the backend APIs d
 - **Retrieve a Transaction by ID**: Enter the Transaction ID and click **Get Transaction**.
 - **Retrieve Transactions by Type**: Enter the type of transactions and click **Get Transactions**.
 - **Calculate Sum of Linked Transactions**: Enter the Transaction ID and click **Get Sum**.
+
+## Testing using pytest
+
+This project uses `pytest` for unit testing. The tests cover:
+- API endpoint validation.
+- Correctness of transaction creation, retrieval, and sum calculations.
+
+### Running Tests
+
+To run the tests, ensure you are in the project directory and use the following command:
+
+```bash
+PYTHONPATH=./ pytest tests/
 
 
 ## Features
